@@ -37,7 +37,7 @@ def get_data():
     return jsonify(forecast)
 
 @app.route('/update_trigger_test')
-def trigger():
+def trigger_test():
     
     counter = 0
     for ticker in dow30:
@@ -50,7 +50,7 @@ def trigger():
     return 'done'
 
 @app.route('/update_trigger_prod')
-def trigger():
+def trigger_prod():
     
     counter = 0
     for ticker in dow30:
@@ -87,3 +87,6 @@ def add_dow30_prod():
 
     print(counter, 'of 30 added to prod')
     return 'done'
+
+if __name__ == "__main__":
+    app.run(debug=True)
