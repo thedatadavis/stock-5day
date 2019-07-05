@@ -1,2 +1,9 @@
+# For forecasting
+Cython
+numpy
+pystan
+fbprophet
+
+# For web app
 Flask
 Gunicorn
