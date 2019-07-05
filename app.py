@@ -36,7 +36,7 @@ def get_data():
 
     return jsonify(forecast)
 
-@app.route('/update_trigger')
+@app.route('/update_trigger_test')
 def trigger():
     
     counter = 0
@@ -46,7 +46,20 @@ def trigger():
         if r.status_code == 200:
             counter += 1
 
-    print(counter, 'of 30 added to test')
+    print(counter, 'of 30 updates triggered in test')
+    return 'done'
+
+@app.route('/update_trigger_prod')
+def trigger():
+    
+    counter = 0
+    for ticker in dow30:
+        url = 'https://stock-5day.bubbleapps.io/version-live/api/1.1/wf/update_forecast?'
+        r = requests.post(url + 'ticker={}'.format(ticker))
+        if r.status_code == 200:
+            counter += 1
+
+    print(counter, 'of 30 updates triggered in prod')
     return 'done'
 
 @app.route('/add_dow30_to_test')
