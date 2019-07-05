@@ -3,6 +3,9 @@ Cython
 numpy
 pystan
 fbprophet
+datetime
+os
+requests
 
 # For web app
 Flask
