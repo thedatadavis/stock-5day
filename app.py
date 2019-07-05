@@ -87,6 +87,3 @@ def add_dow30_prod():
 
     print(counter, 'of 30 added to prod')
     return 'done'
-
-if __name__ == "__main__":
-    app.run(debug=True)
