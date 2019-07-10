@@ -38,7 +38,7 @@ def home():
 @app.route('/version')
 def get_version():
     version = {'yes': 'test', 'no': 'live'}
-    is_dev = request.args.get('version)
+    is_dev = request.args.get('version')
     return version[is_dev]
 
 @app.route('/split_text', methods=['GET'])
