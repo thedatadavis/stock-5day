@@ -28,8 +28,8 @@ def forecast_stock(ticker, version='test'):
     low_f - forecast for day's low
     day_result_f - forecast for day's performance
     
-    """
-        
+    """      
+
     if version == 'test':
         token = os.getenv('STOCK_PRICE_API_TOKEN_TEST')
         url = 'https://sandbox.iexapis.com/stable/stock/{}/chart/1m?token={}'.format(ticker, token)
@@ -75,6 +75,11 @@ def forecast_stock(ticker, version='test'):
             forecast['day_result_f'] = 'up'
         else:
             forecast['day_result_f'] = 'down'
-        forecasts.append(forecast)
+
+        num_check = [forecast['open_f'],forecast['close_f'],forecast['low_f'],forecast['high_f']]
+        forecast['high_f'] = max(num_check)
+        forecast['low_f'] = min(num_check)
         
+        forecasts.append(forecast)
+
     return forecasts
