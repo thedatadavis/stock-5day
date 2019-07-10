@@ -1,6 +1,11 @@
 from flask import Flask, request, jsonify
-import forecast_dow30 as fc
 import requests
+
+import utils.forecast as fc
+import utils.data_loader as dl
+
+from multiprocessing import Process
+
 
 app = Flask(__name__)
 
@@ -12,6 +17,19 @@ dow30 = [
     'PFE', 'PG', 'TRV', 'UNH', 'UTX',
     'VZ', 'V', 'WMT', 'WBA', 'DIS',
 ]
+
+def ping_bubble(ticker, version):
+    url = 'https://stock-5day.bubbleapps.io/version-{}/api/1.1/wf/update_forecast?'.format(version)
+    r = requests.post(url + 'ticker={}'.format(ticker))
+    print('updating', ticker, '- status', r.status_code)
+    return ticker
+
+def data_loader(ticker, version):
+    url = 'https://stock-5day.bubbleapps.io/version-{}/api/1.1/wf/add_dow30?'.format(version)
+    r = requests.post(url + 'ticker={}&stock={}'.format(ticker[0], ticker[1]))
+    return 'done'
+
+# -------------------------- ROUTES -----------------------------------------------
 
 @app.route('/')
 def home():
@@ -28,62 +46,45 @@ def split_text():
 
     return jsonify({'ticker': ticker, 'company': company})
 
-@app.route('/get_data', methods=['GET'])
+@app.route('/get_forecast', methods=['GET'])
 def get_data():
     ticker = request.args.get('ticker')
+    version = request.args.get('version', 'test') # test or live
     print('trying for', ticker)
-    forecast = fc.get_stock_data(ticker)
+    forecast = fc.forecast_stock(ticker, version)
 
     return jsonify(forecast)
 
-@app.route('/update_trigger_test')
-def trigger_test():
+@app.route('/update_trigger')
+def trigger():
+    version = request.args.get('version', 'test')
     
-    counter = 0
-    for ticker in dow30:
-        url = 'https://stock-5day.bubbleapps.io/version-test/api/1.1/wf/update_forecast?'
-        r = requests.post(url + 'ticker={}'.format(ticker))
-        if r.status_code == 200:
-            counter += 1
+    procs = []
 
-    print(counter, 'of 30 updates triggered in test')
+    # instantiating process with arguments
+    for ticker in dow30:
+        proc = Process(target=ping_bubble, args=(ticker, version))
+        procs.append(proc)
+        proc.start()
+
+    # complete the processes
+    for proc in procs:
+        proc.join()
+        
     return 'done'
 
-@app.route('/update_trigger_prod')
-def trigger_prod():
+@app.route('/add_dow30')
+def add_tickers_to_db():
+    version = request.args.get('version', 'test')
     
-    counter = 0
+    procs = []
+    dow30 = dl.stock_list()
     for ticker in dow30:
-        url = 'https://stock-5day.bubbleapps.io/version-live/api/1.1/wf/update_forecast?'
-        r = requests.post(url + 'ticker={}'.format(ticker))
-        if r.status_code == 200:
-            counter += 1
+        proc = Process(target=data_loader, args=(ticker, version))
+        procs.append(proc)
+        proc.start()
 
-    print(counter, 'of 30 updates triggered in prod')
-    return 'done'
-
-@app.route('/add_dow30_to_test')
-def add_dow30_test():
-
-    counter = 0
-    for ticker in dow30:
-        url = 'https://stock-5day.bubbleapps.io/version-test/api/1.1/wf/add_dow30?'
-        r = requests.post(url + 'ticker={}'.format(ticker))
-        if r.status_code == 200:
-            counter += 1
-
-    print(counter, 'of 30 added to test')
-    return 'done'
-
-@app.route('/add_dow30_to_prod')
-def add_dow30_prod():
-
-    counter = 0
-    for ticker in dow30:
-        url = 'https://stock-5day.bubbleapps.io/version-live/api/1.1/wf/add_dow30?'
-        r = requests.post(url + 'ticker={}'.format(ticker))
-        if r.status_code == 200:
-            counter += 1
-
-    print(counter, 'of 30 added to prod')
+    # complete the processes
+    for proc in procs:
+        proc.join()
     return 'done'

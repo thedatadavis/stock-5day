@@ -1,10 +1,12 @@
 # For forecasting
-Cython
-numpy
-pystan
-fbprophet
 datetime
 requests
+pandas
+json
+
+# For web app
+Flask
+Gunicorn
 
 # For web app
 Flask
