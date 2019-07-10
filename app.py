@@ -35,6 +35,12 @@ def data_loader(ticker, version):
 def home():
     return 'STOCK 5DAY'
 
+@app.route('/version')
+def get_version():
+    version = {'yes': 'test', 'no': 'live'}
+    is_dev = request.args.get('version)
+    return version[is_dev]
+
 @app.route('/split_text', methods=['GET'])
 def split_text():
 
