@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import json
 import datetime
+import os
 
 from .date_calcs import date_by_adding_business_days
 
@@ -20,7 +21,7 @@ def forecast_stock(ticker, version='test'):
     
     Returns: Dict
     -------------
-    date - a datetime object representing a future trading day
+    date_f - a datetime object representing a future trading day
     open_f - forecast for day's open
     close_f - forecast for day's close
     high_f - forecast for day's high
@@ -30,11 +31,11 @@ def forecast_stock(ticker, version='test'):
     """
         
     if version == 'test':
-        token = 'Tpk_ebe2d6a630a611e9958142010a80043c'
+        token = os.getenv('STOCK_PRICE_API_TOKEN_TEST')
         url = 'https://sandbox.iexapis.com/stable/stock/{}/chart/1m?token={}'.format(ticker, token)
         
-    if version == 'prod':
-        token = 'pk_d8f06c2fcddd4e03a4c1bc1d4c4be045'
+    if version == 'live':
+        token = os.getenv('STOCK_PRICE_API_TOKEN_LIVE')
         url = 'https://cloud.iexapis.com/stable/stock/{}/chart/1m?token={}'.format(ticker, token)
 
     r = requests.get(url)
